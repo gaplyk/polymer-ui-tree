@@ -1,0 +1,137 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<polymer-element name="polymer-ui-tree" attributes="tree">
+    <template>
+        <style>
+            ul {
+                list-style: none;
+                margin: 0px;
+                padding: 0px;
+                font-family: tahoma, arial, helvetica;
+                font-size: 10pt;
+            }
+
+            ul > li {
+                background: transparent url("vline.gif") 0 0 repeat-y;
+                margin: 0;
+                padding: 1px 0 0 0;
+            }
+
+            li > ul {
+                padding-left: 16px;
+            }
+
+            a {
+                display: inline-block;
+                vertical-align: top;
+                cursor: pointer;
+            }
+
+            a:hover {
+                background-color: #ddd;
+            }
+
+            li div {
+                display: inline-block;
+                vertical-align: top;
+            }
+
+            li.collapse ul {
+                display: none;
+            }
+
+            li span {
+                background: transparent url('icons.gif') 0 0 no-repeat;
+                width: 16px;
+                height: 16px;
+                display: inline-block;
+                vertical-align: top;
+            }
+
+            li span.expander {
+                background-position: 0px -80px;
+                cursor: pointer
+            }
+
+            li span.expander.collapse {
+                background-position: -32px -80px;
+                cursor: pointer
+            }
+
+            li span.connector {
+                background-position: -16px -64px;
+            }
+
+            li span.file {
+                margin-left: 3px;
+                background-position: 0px 0px;
+            }
+
+            li span.folder {
+                margin-left: 3px;
+                background-position: 0px -16px;
+            }
+
+            ul > li:last-child {
+                background: none;
+            }
+
+            ul > li:last-child > div > span.expander {
+                background-position: 0px -96px;
+            }
+
+            ul > li:last-child > div > span.expander.collapse {
+                background-position: -32px -96px;
+            }
+
+        </style>
+        <template if="{{tree.length > 0}}">
+            <div>
+                <a on-click="{{expandAll}}">expand all</a>
+                <a on-click="{{collapseAll}}">collapse all</a>
+            </div>
+        </template>
+        <ul>
+            <template id="row" repeat="{{tree}}">
+                <li>
+                    <div>
+                        <template if="{{children.length > 0}}"><span class="expander collapse" on-click="{{toggleState}}"></span><span class="folder"></span></template>
+                        <template if="{{children.length == 0}}"><span class="connector"></span><span class="file"></span></template>
+                        <a on-click="{{liClick}}" rel="{{label}}">{{label}}</a>
+                    </div>
+                    <ul template if="{{children.length > 0}}">
+                        <template ref="row" repeat="{{children}}"></template>
+                    </ul>
+                </li>
+            </template>
+        </ul>
+    </template>
+    <script>
+        Polymer("polymer-ui-tree", {
+            liClick: function(e, detail, sender){
+                this.fire('polymer-change-tree-node', {node: sender.getAttribute('rel')});
+            },
+            changeState : function(el){
+                el.classList.toggle('collapse');
+                el.parentNode.parentNode.classList.toggle('collapse');
+            },
+            toggleState : function(e, detail, sender){
+                this.changeState(sender);
+            },
+            expandAll : function(e, detail, sender){
+                var nodes = sender.parentNode.parentNode.querySelectorAll('li span.expander');
+                for(var i= 0, l = nodes.length; i<l; i++){
+                    if(!nodes[i].classList.contains('collapse')){
+                        this.changeState(nodes[i]);
+                    }
+                }
+            },
+            collapseAll : function(e, detail, sender){
+                var nodes = sender.parentNode.parentNode.querySelectorAll('li span.collapse');
+                for(var i= 0, l = nodes.length; i<l; i++){
+                    this.changeState(nodes[i]);
+                }
+            }
+        });
+    </script>
+</polymer-element>
